@@ -13,9 +13,9 @@ public class Range {
         this.minValue = minValue;
     }
 
-    public int allocate() {
+    public synchronized int allocate() {
         boolean retry = false;
-        int value = -1;
+        int value;
         boolean isFree;
         do {
             isFree = !range[pointer];
@@ -36,6 +36,9 @@ public class Range {
     }
 
     public synchronized void release(int value) {
+        if (value < minValue || value > minValue + range.length) {
+            return;
+        }
         range[value - minValue] = false;
     }
 

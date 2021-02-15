@@ -2,6 +2,7 @@ package com.fhtagneast.allocator.impl;
 
 import com.fhtagneast.allocator.RangeAllocator;
 import com.fhtagneast.allocator.exceptions.InvalidRangeBoundariesException;
+import com.fhtagneast.allocator.exceptions.ThereIsNoRangeException;
 import com.fhtagneast.allocator.utils.Range;
 
 import java.util.Map;
@@ -14,6 +15,7 @@ public class RangeAllocatorImpl implements RangeAllocator {
 
     private final Map<Integer, Range> rangeMapping = new ConcurrentHashMap<>();
 
+    @Override
     public int createRange(int minValue, int maxValue) {
         if (maxValue < minValue) {
             throw new InvalidRangeBoundariesException(minValue, maxValue);
@@ -28,21 +30,23 @@ public class RangeAllocatorImpl implements RangeAllocator {
         return rangeId;
     }
 
+    @Override
     public int allocate(int rangeId) {
         Range range = rangeMapping.get(rangeId);
         if (range != null) {
             return range.allocate();
         } else {
-            throw new RuntimeException("There is no range for current ID.");
+            throw new ThereIsNoRangeException(rangeId);
         }
     }
 
+    @Override
     public void release(int rangeId, int value) {
         Range range = rangeMapping.get(rangeId);
         if (range != null) {
             range.release(value);
         } else {
-            throw new RuntimeException("There is no range for current ID.");
+            throw new ThereIsNoRangeException(rangeId);
         }
     }
 
